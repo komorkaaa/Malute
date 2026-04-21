@@ -45,7 +45,6 @@ public class UserCardActivity extends AppCompatActivity {
 
         BottomNavHelper.setup(this, BottomNavHelper.Screen.PROFILE);
 
-        ordersRow.setOnClickListener(v -> Toast.makeText(this, "Мои заказы пока не готовы", Toast.LENGTH_SHORT).show());
         privacyTextView.setOnClickListener(v -> Toast.makeText(this, "Политика конфиденциальности", Toast.LENGTH_SHORT).show());
         agreementTextView.setOnClickListener(v -> Toast.makeText(this, "Пользовательское соглашение", Toast.LENGTH_SHORT).show());
         logoutTextView.setOnClickListener(v -> {

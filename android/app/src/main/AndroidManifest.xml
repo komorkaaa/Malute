@@ -25,6 +25,12 @@
             android:name=".ProjectsActivity"
             android:exported="false" />
         <activity
+            android:name=".CreateProjectActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProjectDetailsActivity"
+            android:exported="false" />
+        <activity
             android:name=".CatalogActivity"
             android:exported="false" />
         <activity
