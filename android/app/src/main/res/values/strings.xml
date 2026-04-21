@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SmartLabActivity</string>
+    <string name="app_name">Matule</string>
     <string name="title_activity_analise">AnaliseActivity</string>
     <!--    <string name="underlined_text"><u>Пропустить</u></string>-->
 </resources>

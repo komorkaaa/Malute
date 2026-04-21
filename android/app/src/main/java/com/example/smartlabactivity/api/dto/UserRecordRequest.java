@@ -18,10 +18,10 @@ public class UserRecordRequest {
     @SerializedName("verified")
     public boolean verified;
 
-    public UserRecordRequest(String email, String password) {
+    public UserRecordRequest(String email, String password, String passwordConfirm) {
         this.email = email;
         this.password = password;
-        this.passwordConfirm = password;
+        this.passwordConfirm = passwordConfirm;
         this.emailVisibility = true;
         this.verified = false;
     }
