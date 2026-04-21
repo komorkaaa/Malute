@@ -28,6 +28,9 @@
             android:name=".PasswordActivity"
             android:exported="false" />
         <activity
+            android:name=".RegistrationPasswordActivity"
+            android:exported="false" />
+        <activity
             android:name=".RegistrationActivity"
             android:exported="false" />
         <activity
