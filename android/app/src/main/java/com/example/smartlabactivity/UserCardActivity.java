@@ -10,9 +10,15 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
+import com.example.smartlabactivity.api.OrderRepository;
+import com.example.smartlabactivity.api.UserRepository;
+import com.example.smartlabactivity.api.dto.OrdersListResponse;
+import com.example.smartlabactivity.api.dto.UserRecordResponse;
+
 public class UserCardActivity extends AppCompatActivity {
     private static final String PREF_EMAIL = "Email";
-    private static final String PREF_FIRST_NAME = "profile_first_name";
+    private static final String PREF_USER_ID = "user_id";
+    private static final String PREF_TOKEN = "auth_token";
     private static final String PREF_NOTIFICATIONS = "profile_notifications_enabled";
 
     private SharedPreferences settings;
@@ -32,10 +38,8 @@ public class UserCardActivity extends AppCompatActivity {
         TextView agreementTextView = findViewById(R.id.tvAgreement);
         TextView logoutTextView = findViewById(R.id.tvLogout);
 
-        String firstName = settings.getString(PREF_FIRST_NAME, "");
         String email = settings.getString(PREF_EMAIL, "");
-
-        profileNameTextView.setText(firstName == null || firstName.isEmpty() ? "Профиль" : firstName);
+        profileNameTextView.setText("Профиль");
         profileEmailTextView.setText(email == null || email.isEmpty() ? "email@example.com" : email);
 
         notificationsSwitch.setChecked(settings.getBoolean(PREF_NOTIFICATIONS, true));
@@ -43,7 +47,10 @@ public class UserCardActivity extends AppCompatActivity {
                 settings.edit().putBoolean(PREF_NOTIFICATIONS, isChecked).apply()
         );
 
+        ordersRow.setOnClickListener(v -> loadOrdersCount());
+
         BottomNavHelper.setup(this, BottomNavHelper.Screen.PROFILE);
+        loadProfile(profileNameTextView, profileEmailTextView);
 
         privacyTextView.setOnClickListener(v -> Toast.makeText(this, "Политика конфиденциальности", Toast.LENGTH_SHORT).show());
         agreementTextView.setOnClickListener(v -> Toast.makeText(this, "Пользовательское соглашение", Toast.LENGTH_SHORT).show());
@@ -52,6 +59,63 @@ public class UserCardActivity extends AppCompatActivity {
             Intent intent = new Intent(UserCardActivity.this, AuthActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+        });
+    }
+
+    private void loadProfile(TextView nameTextView, TextView emailTextView) {
+        String token = settings.getString(PREF_TOKEN, "");
+        String userId = settings.getString(PREF_USER_ID, "");
+        if (token == null || token.isEmpty() || userId == null || userId.isEmpty()) {
+            return;
+        }
+
+        new UserRepository().getUserById(token, userId, new UserRepository.UserCallback() {
+            @Override
+            public void onSuccess(UserRecordResponse user) {
+                runOnUiThread(() -> {
+                    nameTextView.setText(user.first_name == null || user.first_name.isEmpty()
+                            ? "Профиль" : user.first_name);
+                    emailTextView.setText(user.email == null || user.email.isEmpty()
+                            ? "email@example.com" : user.email);
+                    settings.edit().putString(PREF_EMAIL, user.email).apply();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(
+                        UserCardActivity.this,
+                        "Ошибка: " + error,
+                        Toast.LENGTH_SHORT
+                ).show());
+            }
+        });
+    }
+
+    private void loadOrdersCount() {
+        String token = settings.getString(PREF_TOKEN, "");
+        if (token == null || token.isEmpty()) {
+            return;
+        }
+
+        new OrderRepository().getOrders(token, new OrderRepository.OrdersCallback() {
+            @Override
+            public void onSuccess(OrdersListResponse response) {
+                runOnUiThread(() -> Toast.makeText(
+                        UserCardActivity.this,
+                        "Заказов: " + response.totalItems,
+                        Toast.LENGTH_SHORT
+                ).show());
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(
+                        UserCardActivity.this,
+                        "Ошибка: " + error,
+                        Toast.LENGTH_SHORT
+                ).show());
+            }
         });
     }
 }

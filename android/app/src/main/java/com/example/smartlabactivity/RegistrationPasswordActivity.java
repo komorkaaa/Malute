@@ -29,7 +29,6 @@ public class RegistrationPasswordActivity extends AppCompatActivity {
     private static final String PREF_EMAIL = "Email";
     private static final String PREF_USER_ID = "user_id";
     private static final String PREF_TOKEN = "auth_token";
-    private static final String PREF_FIRST_NAME = "profile_first_name";
 
     private EditText passwordEditText;
     private EditText passwordConfirmEditText;
@@ -171,7 +170,6 @@ public class RegistrationPasswordActivity extends AppCompatActivity {
                             editor.putString(PREF_EMAIL, tokenResponse.record.email);
                             editor.putString(PREF_USER_ID, tokenResponse.record.id);
                             editor.putString(PREF_TOKEN, tokenResponse.token);
-                            editor.putString(PREF_FIRST_NAME, firstName);
                             editor.apply();
 
                             Toast.makeText(RegistrationPasswordActivity.this,

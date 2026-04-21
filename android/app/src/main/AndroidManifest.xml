@@ -34,6 +34,12 @@
             android:name=".CatalogActivity"
             android:exported="false" />
         <activity
+            android:name=".ProductDetailsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".BasketActivity"
+            android:exported="false" />
+        <activity
             android:name=".UserCardActivity"
             android:exported="false" />
         <activity

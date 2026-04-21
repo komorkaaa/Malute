@@ -25,7 +25,6 @@ public class AuthActivity extends AppCompatActivity {
     private static final String PREF_EMAIL = "Email";
     private static final String PREF_USER_ID = "user_id";
     private static final String PREF_TOKEN = "auth_token";
-    private static final String PREF_FIRST_NAME = "profile_first_name";
 
     private EditText emailEditText;
     private EditText passwordEditText;
@@ -103,7 +102,6 @@ public class AuthActivity extends AppCompatActivity {
                     editor.putString(PREF_EMAIL, tokenResponse.record.email);
                     editor.putString(PREF_USER_ID, tokenResponse.record.id);
                     editor.putString(PREF_TOKEN, tokenResponse.token);
-                    editor.putString(PREF_FIRST_NAME, tokenResponse.record.first_name);
                     editor.apply();
 
                     startActivity(new Intent(AuthActivity.this, PageAnaliseActivity.class));

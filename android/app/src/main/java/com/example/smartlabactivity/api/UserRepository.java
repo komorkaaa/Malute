@@ -1,7 +1,10 @@
 package com.example.smartlabactivity.api;
 
 import com.example.smartlabactivity.api.dto.AuthRequest;
+import com.example.smartlabactivity.api.dto.AuthOtpRequest;
 import com.example.smartlabactivity.api.dto.ErrorResponse;
+import com.example.smartlabactivity.api.dto.RequestOtpRequest;
+import com.example.smartlabactivity.api.dto.ResponseOtp;
 import com.example.smartlabactivity.api.dto.TokenResponse;
 import com.example.smartlabactivity.api.dto.UpdateUserRequest;
 import com.example.smartlabactivity.api.dto.UserRecordRequest;
@@ -99,6 +102,43 @@ public class UserRepository {
         });
     }
 
+    public void requestOtp(String email, final OtpCallback callback) {
+        apiService.requestOtp(new RequestOtpRequest(email)).enqueue(new Callback<ResponseOtp>() {
+            @Override
+            public void onResponse(Call<ResponseOtp> call, Response<ResponseOtp> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError(parseErrorResponse(response));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseOtp> call, Throwable t) {
+                callback.onError("Сетевая ошибка: " + t.getMessage());
+            }
+        });
+    }
+
+    public void authWithOtp(String otpId, String password, final LoginCallback callback) {
+        apiService.authWithOtp(new AuthOtpRequest(otpId, password))
+                .enqueue(new Callback<TokenResponse>() {
+                    @Override
+                    public void onResponse(Call<TokenResponse> call, Response<TokenResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            callback.onSuccess(response.body());
+                        } else {
+                            callback.onError(parseErrorResponse(response));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<TokenResponse> call, Throwable t) {
+                        callback.onError("Сетевая ошибка: " + t.getMessage());
+                    }
+                });
+    }
+
     public void updateUser(
             String token,
             String userId,
@@ -124,6 +164,25 @@ public class UserRepository {
                             Call<UserRecordResponse> call,
                             Response<UserRecordResponse> response
                     ) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            callback.onSuccess(response.body());
+                        } else {
+                            callback.onError(parseErrorResponse(response));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<UserRecordResponse> call, Throwable t) {
+                        callback.onError("Сетевая ошибка: " + t.getMessage());
+                    }
+                });
+    }
+
+    public void getUserById(String token, String userId, final UserCallback callback) {
+        apiService.getUserById(userId, "Bearer " + token)
+                .enqueue(new Callback<UserRecordResponse>() {
+                    @Override
+                    public void onResponse(Call<UserRecordResponse> call, Response<UserRecordResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             callback.onSuccess(response.body());
                         } else {
@@ -176,6 +235,16 @@ public class UserRepository {
 
     public interface UpdateCallback {
         void onSuccess(UserRecordResponse user);
+        void onError(String error);
+    }
+
+    public interface UserCallback {
+        void onSuccess(UserRecordResponse user);
+        void onError(String error);
+    }
+
+    public interface OtpCallback {
+        void onSuccess(ResponseOtp responseOtp);
         void onError(String error);
     }
 }
