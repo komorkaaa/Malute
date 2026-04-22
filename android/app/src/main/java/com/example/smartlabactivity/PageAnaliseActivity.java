@@ -15,8 +15,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.smartlabactivity.api.ShopRepository;
+import com.example.smartlabactivity.api.dto.NewsListResponse;
+import com.example.smartlabactivity.api.dto.NewsRecordResponse;
 import com.example.smartlabactivity.api.dto.ProductRecordResponse;
 import com.example.smartlabactivity.api.dto.ProductsListResponse;
+import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -35,6 +38,7 @@ public class PageAnaliseActivity extends AppCompatActivity {
     private TextView emptyTextView;
 
     private final List<ProductRecordResponse> allProducts = new ArrayList<>();
+    private final List<NewsRecordResponse> allNews = new ArrayList<>();
     private String selectedCategory = "all";
 
     @Override
@@ -77,7 +81,6 @@ public class PageAnaliseActivity extends AppCompatActivity {
                     if (response.items != null) {
                         allProducts.addAll(response.items);
                     }
-                    renderPromos();
                     renderProducts();
                 });
             }
@@ -91,11 +94,39 @@ public class PageAnaliseActivity extends AppCompatActivity {
                 ).show());
             }
         });
+
+        new ShopRepository().getNews(token, new ShopRepository.NewsCallback() {
+            @Override
+            public void onSuccess(NewsListResponse response) {
+                runOnUiThread(() -> {
+                    allNews.clear();
+                    if (response.items != null) {
+                        allNews.addAll(response.items);
+                    }
+                    renderPromos();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(PageAnaliseActivity.this::renderPromos);
+            }
+        });
     }
 
     private void renderPromos() {
         promoContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(this);
+
+        if (!allNews.isEmpty()) {
+            for (int i = 0; i < Math.min(2, allNews.size()); i++) {
+                NewsRecordResponse news = allNews.get(i);
+                View card = inflater.inflate(R.layout.item_home_promo_card, promoContainer, false);
+                bindNewsCard(card, news, i);
+                promoContainer.addView(card);
+            }
+            return;
+        }
 
         for (int i = 0; i < Math.min(2, allProducts.size()); i++) {
             ProductRecordResponse product = allProducts.get(i);
@@ -109,6 +140,38 @@ public class PageAnaliseActivity extends AppCompatActivity {
             card.setOnClickListener(v -> openProduct(product));
             promoContainer.addView(card);
         }
+    }
+
+    private void bindNewsCard(View card, NewsRecordResponse news, int position) {
+        android.widget.ImageView imageView = card.findViewById(R.id.ivPromoImage);
+
+        String imageUrl = buildNewsImageUrl(news);
+        if (imageUrl.isEmpty()) {
+            imageView.setImageResource(position % 2 == 0
+                    ? R.drawable.catalog_promo_background_a
+                    : R.drawable.catalog_promo_background_b);
+        } else {
+            Glide.with(this)
+                    .load(imageUrl)
+                    .centerCrop()
+                    .into(imageView);
+        }
+
+        card.setOnClickListener(v -> openCatalog());
+    }
+
+    private String buildNewsImageUrl(NewsRecordResponse news) {
+        if (news == null
+                || news.collectionId == null || news.collectionId.isEmpty()
+                || news.id == null || news.id.isEmpty()
+                || news.newsImage == null || news.newsImage.isEmpty()) {
+            return "";
+        }
+
+        return "http://2.nntc.nnov.ru:8900/api/files/"
+                + news.collectionId + "/"
+                + news.id + "/"
+                + news.newsImage;
     }
 
     private void renderProducts() {
